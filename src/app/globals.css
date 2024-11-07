@@ -2,6 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+
+@font-face {
+  font-family: 'Cairo'; /* Or your chosen Arabic font */
+  src: url('/fonts/Cairo-Regular.ttf') format('truetype'); /* Adjust path and format if necessary */
+  font-weight: 400; /* Regular weight */
+}
+
+@font-face {
+  font-family: 'Cairo';
+  src: url('/fonts/Cairo-Bold.ttf') format('truetype'); /* Add other weights as needed */
+  font-weight: 700; /* Bold weight */
+}
+
+
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -17,5 +32,6 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Cairo', sans-serif; 
+  direction: rtl; 
 }
