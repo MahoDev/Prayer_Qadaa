@@ -23,7 +23,8 @@ export default function LoginPage() {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      router.push("/dashboard");
+      //router.push("/dashboard"); temp
+      router.push("/");
     } catch (error: any) {
       if (error.message.includes("auth/user-not-found"))
         setError("المستخدم غير موجود");
@@ -125,11 +126,21 @@ export default function LoginPage() {
                 تسجيل الدخول باستخدام جوجل
               </button>
             </div>
-            <div className="text-center mt-2 text-sm text-gray-600">
-              ليس لديك حساب؟{" "}
-              <Link href="/register" className="text-blue-600">
-                إنشاء حساب
-              </Link>
+            <div className="space-y-3">
+              <div className="text-center mt-4 ">
+                <Link
+                  href="/password-reset"
+                  className="text-sm text-blue-600 hover:underline"
+                >
+                  نسيت كلمة المرور؟
+                </Link>
+              </div>
+              <div className="text-center  text-sm text-gray-600">
+                ليس لديك حساب؟{" "}
+                <Link href="/register" className="text-blue-600">
+                  إنشاء حساب
+                </Link>
+              </div>
             </div>
           </form>
         </div>
