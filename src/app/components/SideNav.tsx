@@ -42,10 +42,10 @@ const SideNav = ({ isSidebarOpen}:SideNavProps) => {
 						الصلوات الفائتة
 					</Link>
 					<Link
-						href="/qadaa-plan"
+						href="/qadaa-plans"
 						className="block py-2 px-4 hover:bg-gray-100"
 					>
-						خطة القضاء
+						خطط القضاء
 					</Link>
 					<Link
 						href="/progress-visualization"

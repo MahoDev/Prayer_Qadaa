@@ -1,25 +1,30 @@
-// app/layout.js
 import type { Metadata } from "next";
 import "./globals.css";
-import { ReactNode } from "react";
-import FirebaseAuthRedirect from "@/app/lib/firebaseAuthRedirect";
+import AuthRedirect from "@/app/lib/authRedirect";
+import { auth } from "./lib/firebase";
+import { ToastContainer } from 'react-toastify'; 
+import 'react-toastify/dist/ReactToastify.css'; 
+import NotificationHandler from "./lib/NotificationHandler";
 
 export const metadata: Metadata = {
-  title: "قاضي",
-  description: "موقع يساعد على قضاء الصلوات الفائتة",
+	title: "قاضي",
+	description: "موقع يسهل عليك قضاء صلواتك الفائتة",
 };
 
 export default function RootLayout({
-  children,
+	children,
 }: Readonly<{
-  children: React.ReactNode;
+	children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en">
-      <body className="">
-        <FirebaseAuthRedirect /> 
-        {children}
-      </body>
-    </html>
-  );
+
+	return (
+		<html lang="en">
+			<body className="">
+				<ToastContainer rtl stacked />
+				<AuthRedirect />
+				<NotificationHandler/>
+				{children}
+			</body>
+		</html>
+	);
 }

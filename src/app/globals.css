@@ -2,36 +2,69 @@
 @tailwind components;
 @tailwind utilities;
 
-
 @font-face {
-  font-family: 'Cairo'; /* Or your chosen Arabic font */
-  src: url('/fonts/Cairo-Regular.ttf') format('truetype'); /* Adjust path and format if necessary */
-  font-weight: 400; /* Regular weight */
+	font-family: "Cairo"; /* Or your chosen Arabic font */
+	src: url("/fonts/Cairo-Regular.ttf") format("truetype"); /* Adjust path and format if necessary */
+	font-weight: 400; /* Regular weight */
 }
 
 @font-face {
-  font-family: 'Cairo';
-  src: url('/fonts/Cairo-Bold.ttf') format('truetype'); /* Add other weights as needed */
-  font-weight: 700; /* Bold weight */
+	font-family: "Cairo";
+	src: url("/fonts/Cairo-Bold.ttf") format("truetype"); /* Add other weights as needed */
+	font-weight: 700; /* Bold weight */
 }
 
 
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+	--background: #ffffff;
+	--foreground: #171717;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+	:root {
+		--background: #0a0a0a;
+		--foreground: #ededed;
+	}
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: 'Cairo', sans-serif; 
-  direction: rtl; 
+	color: var(--foreground);
+	background: var(--background);
+	font-family: "Cairo", sans-serif;
+	direction: rtl;
+}
+
+.SelectTrigger {
+	@apply w-full rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+}
+
+.SelectContent {
+	@apply shadow-md bg-white rounded-md py-1 text-gray-900 shadow-lg;
+}
+
+.SelectItem {
+	@apply px-3 py-2 rounded hover:bg-gray-100;
+}
+
+
+/* Radix UI styles */
+@layer base {
+	button {
+		@apply font-medium leading-none text-sm text-gray-900;
+	}
+	svg {
+		@apply fill-current;
+	}
+
+	.TooltipContent {
+		@apply rounded-md bg-gray-700 px-3 py-1.5 text-xs text-white;
+	}
+
+	.TooltipArrow {
+		@apply fill-current text-gray-700;
+	}
+	input {
+		@apply text-gray-500;
+	}
 }

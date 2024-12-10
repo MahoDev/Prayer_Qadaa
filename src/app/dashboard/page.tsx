@@ -202,14 +202,14 @@ export default function DashboardPage() {
 					display: true,
 					text: "تاريخ الصلاة", // x-axis label
 				},
-				stacked: true, // Stack bars for each prayer type
+				stacked: false, // Stack bars for each prayer type
 			},
 			y: {
 				title: {
 					display: true,
 					text: "عدد الصلوات", // y-axis label
 				},
-				stacked: true, // Stack bars for each prayer type
+				stacked: false, // Stack bars for each prayer type
 				beginAtZero: true,
 			},
 		},
@@ -255,7 +255,7 @@ export default function DashboardPage() {
 			fajr: "rgba(255, 99, 132, 0.5)", 
 			dhur: "rgba(54, 162, 235, 0.5)",
 			asr: "rgba(255, 206, 86, 0.5)",
-			maghrib: "rgba(75, 192, 192, 0.5)",
+			maghrib: "rgba(102, 162, 86, 0.5)",
 			isha: "rgba(153, 102, 255, 0.5)",
 		};
 		return colors[prayerType];
