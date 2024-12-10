@@ -48,6 +48,9 @@ import {
 	onSnapshot,
 	doc,
 	Timestamp,
+	writeBatch,
+	or,
+	and,
 } from "firebase/firestore";
 import { db } from "@/app/lib/firebase";
 import { ar } from "date-fns/locale";
@@ -55,11 +58,13 @@ import {
 	prayerNamesArabic,
 	prayerNames,
 	PrayerType,
+	QadaaPlan,
 } from "@/app/lib/prayerConstants";
 import Layout from "../components/Layout";
 import { Metadata } from "next";
+import { toast } from "react-toastify";
 
- const metadata: Metadata = {
+const metadata: Metadata = {
 	title: "الرئيسية",
 	description: "الصفحة الرئيسية حيث يمكن رؤية وتسجيل التقدم في القضاء",
 };
@@ -74,14 +79,20 @@ ChartJS.register(
 	Legend
 );
 
-const motivationalMessages = [
-	"الصلاة نور",
-	"صل قبل أن يصلى عليك",
-	"إن الصلاة تنهى عن الفحشاء والمنكر",
-];
-
 export default function DashboardPage() {
 	const router = useRouter();
+	const [quickRegisterAmounts, setQuickRegisterAmounts] = useState<
+		Record<PrayerType, number>
+	>(
+		prayerNames.reduce(
+			(acc, prayerName) => ({ ...acc, [prayerName]: 0 }),
+			{} as Record<PrayerType, number>
+		)
+	);
+
+	const [registerDate, setRegisterDate] = useState(
+		format(new Date(), "yyyy-MM-dd")
+	);
 
 	// Authentication check
 	useEffect(() => {
@@ -150,41 +161,7 @@ export default function DashboardPage() {
 		});
 	}, []);
 
-	// Prayer registration dialog visibility
-	const [isPrayerRegistrationOpen, setIsPrayerRegistrationOpen] =
-		useState(false);
-	// Prayer type and date states
-	const [selectedPrayer, setSelectedPrayer] = useState<PrayerType>("fajr");
-	const [prayerDate, setPrayerDate] = useState(
-		format(new Date(), "yyyy-MM-dd")
-	);
-
-
-	// State for the motivational message
-	const [message, setMessage] = useState("");
-
-	useEffect(() => {
-		// Set initial message
-		setMessage(
-			motivationalMessages[
-				Math.floor(Math.random() * motivationalMessages.length)
-			]
-		);
-
-		// Update message every 5 minutes
-		const intervalId = setInterval(() => {
-			setMessage(
-				motivationalMessages[
-					Math.floor(Math.random() * motivationalMessages.length)
-				]
-			);
-		}, 5 * 60 * 1000);
-
-		// Clear interval on component unmount
-		return () => clearInterval(intervalId);
-	}, []);
-
-	// Chart options 
+	// Chart options
 	const options: ChartOptions<"bar"> = {
 		responsive: true,
 		plugins: {
@@ -192,7 +169,7 @@ export default function DashboardPage() {
 				position: "top",
 			},
 			title: {
-				display: false, 
+				display: false,
 				text: "Chart.js Bar Chart",
 			},
 		},
@@ -222,7 +199,7 @@ export default function DashboardPage() {
 			[date: string]: { [prayerType in PrayerType]: number };
 		} = {};
 		completedPrayers.forEach((prayer) => {
-			const date = format(prayer.madeUpDate.toDate(), "yyyy-MM-dd"); // Format date
+			const date = format(prayer.madeUpDate?.toDate(), "yyyy-MM-dd"); // Format date
 			prayersByDate[date] = prayersByDate[date] || {
 				fajr: 0,
 				dhur: 0,
@@ -252,7 +229,7 @@ export default function DashboardPage() {
 	// Helper function to generate colors
 	const getRandomColor = (prayerType: PrayerType) => {
 		const colors: Record<PrayerType, string> = {
-			fajr: "rgba(255, 99, 132, 0.5)", 
+			fajr: "rgba(255, 99, 132, 0.5)",
 			dhur: "rgba(54, 162, 235, 0.5)",
 			asr: "rgba(255, 206, 86, 0.5)",
 			maghrib: "rgba(102, 162, 86, 0.5)",
@@ -281,8 +258,119 @@ export default function DashboardPage() {
 	};
 	const getPrayersForDate = (date: Date, completedPrayers: any[]) => {
 		return completedPrayers.filter((prayer) =>
-			isSameDay(prayer.madeUpDate.toDate(), date)
+			isSameDay(prayer.madeUpDate?.toDate(), date)
 		);
+	};
+
+	const handleQuickRegister = async (prayerType: PrayerType) => {
+		const userId = auth.currentUser?.uid;
+		if (!userId) return toast.error("يرجى تسجيل الدخول");
+
+		const amount = quickRegisterAmounts[prayerType];
+		if (amount <= 0) return; // Don't proceed if amount is not positive
+
+		try {
+			// Batch updates for Firestore
+			const batch = writeBatch(db);
+
+			// 1. Decrement missedPrayers count
+			const missedPrayersRef = doc(db, "missedPrayers", userId);
+			const madeUpDate = Timestamp.fromDate(new Date(registerDate));
+			batch.update(missedPrayersRef, {
+				[prayerType]: increment(-amount), // Decrement by amount
+				lastUpdated: serverTimestamp(),
+			});
+
+			// 2. Add to completedPrayers
+			for (let i = 0; i < amount; i++) {
+				const completedPrayerRef = doc(collection(db, "completedPrayers"));
+				batch.set(completedPrayerRef, {
+					userId,
+					prayerType,
+					madeUpDate,
+					addedDate: new Date(),
+					timestamp: serverTimestamp(),
+				});
+			}
+
+			// 3. Update progress in active Qadaa plan (if any)
+
+			const activePlan = await getActiveQadaaPlan(userId); //Fetch active plan only once
+
+			if (activePlan) {
+				const planRef = doc(db, "qadaaPlans", activePlan.id as string);
+				// Check if target is met for the prayer type
+				if (activePlan.progress[prayerType] < activePlan.targets[prayerType]) {
+					const amountToAdd = Math.min(
+						amount,
+						activePlan.targets[prayerType] - activePlan.progress[prayerType]
+					); // Ensure progress doesn't exceed target
+					batch.update(planRef, {
+						[`progress.${prayerType}`]: increment(amountToAdd),
+					});
+				}
+			}
+
+			await batch.commit();
+
+			setMissedPrayers((prev) => ({
+				...prev,
+				[prayerType]: (prev[prayerType] || 0) - amount,
+			}));
+			setCompletedPrayers((prevCompletedPrayers) => [
+				...prevCompletedPrayers,
+				...Array(amount).fill({
+					userId,
+					prayerType,
+					madeUpDate, // Use madeUpDate here
+					addedDate: new Date(),
+					timestamp: serverTimestamp(),
+				}),
+			]);
+			setQuickRegisterAmounts((prev) => ({ ...prev, [prayerType]: 0 }));
+			toast.success("تم تسجيل الصلاة بنجاح");
+		} catch (error) {
+			console.error("Error in handleQuickRegister:", error);
+			toast.error("حدث خطأ ما");
+		}
+	};
+
+	const handleRegisterAll = async () => {
+		const userId = auth.currentUser?.uid;
+		if (!userId) return toast.error("يرجى تسجيل الدخول");
+
+		//Loop through all prayers
+		for (const prayerName of prayerNames) {
+			await handleQuickRegister(prayerName as PrayerType); // Reuse handleQuickRegister for each prayer
+		}
+	};
+
+	// Helper function to get the active Qadaa plan for a user (if any)
+	const getActiveQadaaPlan = async (userId: string) => {
+		const today = Timestamp.fromDate(new Date());
+		try {
+			const q = query(
+				collection(db, "qadaaPlans"),
+				or(
+					and(
+						where("userId", "==", userId),
+						where("startDate", "<=", today),
+						where("endDate", ">=", today)
+					),
+					where("endDate", "==", null)
+				)
+				//Add or condition for null for ongoing plans
+			);
+			const querySnapshot = await getDocs(q);
+			if (querySnapshot.empty) return null;
+			return {
+				id: querySnapshot.docs[0].id,
+				...querySnapshot.docs[0].data(),
+			} as QadaaPlan;
+		} catch (error) {
+			console.error("Error fetching active plan:", error);
+			return null;
+		}
 	};
 
 	return (
@@ -292,10 +380,6 @@ export default function DashboardPage() {
 				<main
 					className={`flex-1 p-8 overflow-y-auto transition-all duration-300 `}
 				>
-					{/* Motivational Message */}
-					<div className="bg-blue-100 rounded-lg p-4 mb-6">
-						<p className="text-blue-700 font-medium text-center">{message}</p>
-					</div>
 					{/* Prayer Progress Summary */}
 					<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
 						{["fajr", "dhur", "asr", "maghrib", "isha"].map((pn) => {
@@ -314,7 +398,7 @@ export default function DashboardPage() {
 									<h4 className="text-gray-900 font-medium text-lg mb-2">
 										{arabicPrayerName}
 									</h4>
-									<div className="flex justify-between items-center">
+									<div className="flex justify-between items-center mb-2">
 										<p className="text-gray-700">الفائتة: {missedCount}</p>
 										<p className="text-gray-700">المؤداة: {madeUpCount}</p>
 									</div>
@@ -324,26 +408,75 @@ export default function DashboardPage() {
 					</div>
 					{/* Prayer Registration Section */}
 					<div className="bg-white rounded-lg p-6 shadow mb-8">
-						{" "}
 						<h3 className="text-xl font-semibold text-gray-900 mb-4">
-							تسجيل صلاة مؤداة
+							سجل صلواتك المؤداة
 						</h3>
-						{/*  Button to Open Prayer Registration Dialog */}
-						<button
-							onClick={() => setIsPrayerRegistrationOpen(true)}
-							className="w-40 bg-blue-600 text-white rounded py-2 px-4 hover:bg-blue-700"
-						>
-							فتح{" "}
-						</button>
-						<RegisterPrayerDialog
-							isOpen={isPrayerRegistrationOpen}
-							onClose={() => setIsPrayerRegistrationOpen(false)}
-							selectedPrayer={selectedPrayer}
-							setSelectedPrayer={setSelectedPrayer}
-							prayerDate={prayerDate}
-							setPrayerDate={setPrayerDate}
-						/>
+
+						<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+							{prayerNames.map((prayerName) => (
+								<div key={prayerName} className="flex flex-col items-center">
+									{" "}
+									<label
+										htmlFor={prayerName}
+										className="block text-sm font-medium text-gray-700 mb-1"
+									>
+										{prayerNamesArabic[prayerName]}
+									</label>
+									<div className="flex">
+										<input
+											type="number"
+											min="0"
+											id={prayerName}
+											className="border border-gray-300 rounded px-2 py-1 w-20 mb-2 text-center"
+											value={quickRegisterAmounts[prayerName as PrayerType]}
+											onChange={(e) => {
+												const amount = parseInt(e.target.value) || 0;
+
+												setQuickRegisterAmounts((prev) => ({
+													...prev,
+													[prayerName]: amount,
+												}));
+											}}
+										/>
+									</div>
+								</div>
+							))}
+						</div>
+						<form>
+							<div className="flex justify-center items-center mt-2 mb-4">
+								{" "}
+								{/* Container for date input */}
+								<label
+									htmlFor="quickRegisterDate"
+									className="block text-sm font-medium text-gray-700 mr-2"
+								>
+									{" "}
+									تاريخ القضاء
+								</label>
+								<input
+									type="date"
+									id="quickRegisterDate"
+									required
+									className="border border-gray-300 rounded px-2 py-1 w-[50%]"
+								/>
+							</div>
+							<div className="flex justify-center mt-4">
+								{" "}
+								{/* Container for the button */}
+								<button
+									type="submit"
+									onClick={(e) => {
+										e.preventDefault();
+										handleRegisterAll();
+									}}
+									className="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600"
+								>
+									تسجيل الكل
+								</button>
+							</div>
+						</form>
 					</div>
+
 					{/* Monthly Progress Chart */}
 					<div className="bg-white rounded-lg p-6 shadow mt-8 overflow-x-auto ">
 						{" "}
@@ -473,103 +606,3 @@ export default function DashboardPage() {
 		</Layout>
 	);
 }
-
-// Separate component for the Prayer Registration Dialog
-const RegisterPrayerDialog = ({
-	isOpen,
-	onClose,
-	selectedPrayer,
-	setSelectedPrayer,
-	prayerDate,
-	setPrayerDate,
-}: any) => {
-
-	const handlePrayerRegistration = async (userId: string) => {
-		try {
-			const madeUpDate = new Date(prayerDate);
-
-			// 1. Add document to completedPrayers
-			const completedPrayerRef = await addDoc(
-				collection(db, "completedPrayers"),
-				{
-					userId,
-					prayerType: selectedPrayer,
-					madeUpDate,
-					addedDate: new Date(),
-					timestamp: serverTimestamp(),
-				}
-			);
-
-			// 2. Update missedPrayers count
-			const missedPrayersRef = doc(db, "missedPrayers", userId);
-			await updateDoc(missedPrayersRef, {
-				[selectedPrayer]: increment(-1), // Decrement missed count
-				lastUpdated: serverTimestamp(),
-			});
-
-			onClose(); // Close the dialog
-		} catch (error) {
-			console.error("Error registering prayer:", error);
-			// handle the error, e.g., display an error message
-		}
-	};
-
-	return (
-		<DialogRoot open={isOpen} defaultOpen={isOpen} onOpenChange={onClose}>
-			<DialogContent className="bg-white rounded-lg p-6 shadow-lg">
-				{/* Prayer Type Selection */}
-				<DialogTitle className="text-lg font-medium mb-4">
-					{/* empty */}
-				</DialogTitle>
-				<select
-					value={selectedPrayer}
-					onChange={(e) => setSelectedPrayer(e.target.value)}
-					className="block text-black w-full py-2 px-3 border border-gray-300 rounded-md mb-4"
-				>
-					<option value="fajr">الفجر</option>
-					<option value="dhur">الظهر</option>
-					<option value="asr">العصر</option>
-					<option value="maghrib">المغرب</option>
-					<option value="isha">العشاء</option>
-				</select>
-
-				{/* Prayer Date Selection */}
-				<input
-					type="date"
-					value={prayerDate}
-					onChange={(e) => setPrayerDate(e.target.value)}
-					className="block w-full py-2 px-3 border border-gray-300 rounded-md mb-4"
-				/>
-				{/* Buttons */}
-				<div className="flex justify-end">
-					{" "}
-					{/* Right-aligned buttons */}
-					<DialogClose asChild>
-						<button
-							onClick={onClose}
-							className="mr-2 py-2 px-4 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100"
-						>
-							إلغاء
-						</button>
-					</DialogClose>
-					{/* Pass userId to handlePrayerRegistration */}
-					<button
-						onClick={() => {
-							const userId = auth.currentUser?.uid;
-							// Check if user is logged in
-							if (userId) {
-								handlePrayerRegistration(userId);
-							} else {
-								// Handle the case where the user is not logged in
-								console.error("User not logged in");
-							}
-						}}
-						className="py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700"
-					>
-						تسجيل
-					</button>
-				</div>
-			</DialogContent>
-		</DialogRoot>
-	);
-};

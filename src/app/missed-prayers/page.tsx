@@ -5,6 +5,7 @@ import {
 	increment,
 	onSnapshot,
 	serverTimestamp,
+	setDoc,
 	updateDoc,
 } from "firebase/firestore";
 import { auth, db } from "@/app/lib/firebase";
@@ -71,8 +72,29 @@ export default function MissedPrayersPage() {
 	}, []);
 
 	const createMissedPrayersDocument = async (userId: string) => {
-		/* ...  */
+		try {
+			const missedPrayersRef = doc(db, "missedPrayers", userId);
+
+			const initialMissedPrayers: Record<PrayerType, number> =
+				prayerNames.reduce((acc, prayerName) => ({ ...acc, [prayerName]: 0 }), {
+					fajr: 0,
+					dhur: 0,
+					asr: 0,
+					maghrib: 0,
+					isha: 0,
+				}); // Initialize all prayer types to 0
+
+			await setDoc(missedPrayersRef, {
+				...initialMissedPrayers,
+				lastUpdated: serverTimestamp(),
+			});
+			console.log("Missed prayers document created for user:", userId);
+		} catch (error) {
+			console.error("Error creating missed prayers document:", error);
+			toast.error("حدث خطأ ما"); // Display error message to the user
+		}
 	};
+
 
 	const logPrayer = async (
 		prayerName: PrayerType,
