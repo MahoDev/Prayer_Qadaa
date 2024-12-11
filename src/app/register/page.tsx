@@ -72,7 +72,7 @@ export default function RegisterPage() {
 			);
 			const user = userCredential.user; // Get user data
 			await createUserDocument(user); // Redirect to dashboard after successful registration
-			router.push("/dashboard");
+			router.push("/missed-prayers");
 		} catch (err: any) {
 			if (err.message.includes("auth/email-already-in-use"))
 				setError("البريد الإلكتروني مستخدم بالفعل");
@@ -92,7 +92,7 @@ export default function RegisterPage() {
 				await createUserDocument(user);
 
 				// User successfully signed in.  You can get user details from `result.user`.
-				router.push("/dashboard");
+				router.push("/missed-prayers");
 				return;
 			}
 			//await signInWithRedirect(auth, provider);
@@ -198,8 +198,8 @@ export default function RegisterPage() {
 								className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-black bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
 							>
 								{/* Google Sign-Up Button Text */}
-								التسجيل باستخدام جوجل 
-                <RiGoogleFill className="mr-2"/>
+								التسجيل باستخدام جوجل
+								<RiGoogleFill className="mr-2" />
 							</button>
 						</div>
 						<div className="text-center mt-2 text-sm text-gray-600">

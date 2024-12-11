@@ -63,6 +63,7 @@ import {
 import Layout from "../components/Layout";
 import { Metadata } from "next";
 import { toast } from "react-toastify";
+import PrayerChart from "../components/PrayerChart";
 
 const metadata: Metadata = {
 	title: "الرئيسية",
@@ -161,83 +162,6 @@ export default function DashboardPage() {
 		});
 	}, []);
 
-	// Chart options
-	const options: ChartOptions<"bar"> = {
-		responsive: true,
-		plugins: {
-			legend: {
-				position: "top",
-			},
-			title: {
-				display: false,
-				text: "Chart.js Bar Chart",
-			},
-		},
-		scales: {
-			x: {
-				title: {
-					display: true,
-					text: "تاريخ الصلاة", // x-axis label
-				},
-				stacked: false, // Stack bars for each prayer type
-			},
-			y: {
-				title: {
-					display: true,
-					text: "عدد الصلوات", // y-axis label
-				},
-				stacked: false, // Stack bars for each prayer type
-				beginAtZero: true,
-			},
-		},
-	};
-
-	// Function to generate chart data
-	const generateChartData = (completedPrayers: any[]) => {
-		// 1. Group completed prayers by date and prayer type
-		const prayersByDate: {
-			[date: string]: { [prayerType in PrayerType]: number };
-		} = {};
-		completedPrayers.forEach((prayer) => {
-			const date = format(prayer.madeUpDate?.toDate(), "yyyy-MM-dd"); // Format date
-			prayersByDate[date] = prayersByDate[date] || {
-				fajr: 0,
-				dhur: 0,
-				asr: 0,
-				maghrib: 0,
-				isha: 0,
-			};
-			prayersByDate[date][prayer.prayerType as PrayerType]++;
-		});
-
-		// 2. Prepare data for Chart.js
-		const labels = Object.keys(prayersByDate); // Dates as labels
-		const datasets = prayerNames.map((prayerName) => ({
-			// One dataset per prayer type
-			label: prayerNamesArabic[prayerName],
-			data: labels.map((date) => prayersByDate[date][prayerName] || 0), // Get prayer count for each date, or 0 if no prayers
-			backgroundColor: getRandomColor(prayerName), // Assign a color to each prayer type
-		}));
-
-		const data = {
-			labels,
-			datasets,
-		};
-		return data;
-	};
-
-	// Helper function to generate colors
-	const getRandomColor = (prayerType: PrayerType) => {
-		const colors: Record<PrayerType, string> = {
-			fajr: "rgba(255, 99, 132, 0.5)",
-			dhur: "rgba(54, 162, 235, 0.5)",
-			asr: "rgba(255, 206, 86, 0.5)",
-			maghrib: "rgba(102, 162, 86, 0.5)",
-			isha: "rgba(153, 102, 255, 0.5)",
-		};
-		return colors[prayerType];
-	};
-
 	// Streak calculation function
 	const calculateStreak = (completedPrayers: any[]) => {
 		let streak = 0;
@@ -267,21 +191,27 @@ export default function DashboardPage() {
 		if (!userId) return toast.error("يرجى تسجيل الدخول");
 
 		const amount = quickRegisterAmounts[prayerType];
-		if (amount <= 0) return; // Don't proceed if amount is not positive
+		const missedPrayerCount = missedPrayers[prayerType] || 0;
+		const amountToRegister = Math.min(amount, missedPrayerCount); // cannot exceed missed count
 
+		if (amount <= 0) return;
+		
 		try {
 			// Batch updates for Firestore
 			const batch = writeBatch(db);
 
 			// 1. Decrement missedPrayers count
 			const missedPrayersRef = doc(db, "missedPrayers", userId);
-			const madeUpDate = Timestamp.fromDate(new Date(registerDate));
-			batch.update(missedPrayersRef, {
-				[prayerType]: increment(-amount), // Decrement by amount
-				lastUpdated: serverTimestamp(),
-			});
+			if (missedPrayerCount > 0) {
+				batch.update(missedPrayersRef, {
+					[prayerType]: increment(-amountToRegister), // Decrement by amount
+					lastUpdated: serverTimestamp(),
+				});
+			}
 
 			// 2. Add to completedPrayers
+			const madeUpDate = Timestamp.fromDate(new Date(registerDate));
+
 			for (let i = 0; i < amount; i++) {
 				const completedPrayerRef = doc(collection(db, "completedPrayers"));
 				batch.set(completedPrayerRef, {
@@ -315,7 +245,7 @@ export default function DashboardPage() {
 
 			setMissedPrayers((prev) => ({
 				...prev,
-				[prayerType]: (prev[prayerType] || 0) - amount,
+				[prayerType]: (prev[prayerType] || 0) - amountToRegister,
 			}));
 			setCompletedPrayers((prevCompletedPrayers) => [
 				...prevCompletedPrayers,
@@ -442,12 +372,17 @@ export default function DashboardPage() {
 								</div>
 							))}
 						</div>
-						<form>
+						<form
+							onSubmit={(e) => {
+								e.preventDefault();
+								handleRegisterAll();
+							}}
+						>
 							<div className="flex justify-center items-center mt-2 mb-4">
 								{" "}
 								{/* Container for date input */}
 								<label
-									htmlFor="quickRegisterDate"
+									htmlFor="registerDate"
 									className="block text-sm font-medium text-gray-700 mr-2"
 								>
 									{" "}
@@ -455,9 +390,11 @@ export default function DashboardPage() {
 								</label>
 								<input
 									type="date"
-									id="quickRegisterDate"
+									id="registerDate"
 									required
 									className="border border-gray-300 rounded px-2 py-1 w-[50%]"
+									value={registerDate}
+									onChange={(e) => setRegisterDate(e.target.value)}
 								/>
 							</div>
 							<div className="flex justify-center mt-4">
@@ -465,10 +402,6 @@ export default function DashboardPage() {
 								{/* Container for the button */}
 								<button
 									type="submit"
-									onClick={(e) => {
-										e.preventDefault();
-										handleRegisterAll();
-									}}
 									className="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600"
 								>
 									تسجيل الكل
@@ -492,9 +425,10 @@ export default function DashboardPage() {
 							</Link>
 						</div>
 						<div className="min-w-[40rem]">
-							<Bar
-								options={options}
-								data={generateChartData(completedPrayers)}
+							<PrayerChart
+								completedPrayers={completedPrayers}
+								startDate={subDays(new Date(), 28)}
+								endDate={new Date()}
 							/>
 						</div>
 					</div>
