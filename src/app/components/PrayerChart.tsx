@@ -186,7 +186,7 @@ const PrayerChart = ({
 						{isYearly ? "عرض يومي" : "مجموع شهري"}
 					</button>
 				</div>
-
+				//
 				<Bar options={options} data={data} />
 			</div>
 		</div>

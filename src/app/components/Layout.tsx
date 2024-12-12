@@ -1,6 +1,6 @@
 "use client";
-import { ReactNode, useState } from "react";
-import SideNav from "./SideNav"; 
+import { ReactNode, useEffect, useState } from "react";
+import SideNav from "./SideNav";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 
 interface LayoutProps {
@@ -8,7 +8,24 @@ interface LayoutProps {
 }
 
 const Layout = ({ children }: LayoutProps) => {
-	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+	useEffect(() => {
+		// Detect screen size on initial render
+		const handleResize = () => {
+			// Close sidebar if the screen is medium or smaller
+			if (window.innerWidth <= 768) {
+				setIsSidebarOpen(false);
+			} else {
+				setIsSidebarOpen(true);
+			}
+		};
+
+		// Run once on mount and add event listener for screen resizing
+		handleResize();
+		window.addEventListener("resize", handleResize);
+
+		return () => window.removeEventListener("resize", handleResize);
+	}, []);
 
 	return (
 		<div className="h-screen bg-gray-100 flex">

@@ -1,16 +1,39 @@
 "use client";
 import Link from "next/link";
 
-import { auth } from "../lib/firebase";
-import { useState } from "react";
-import { signOut } from "firebase/auth";
-
+import { auth, db } from "../lib/firebase";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { useEffect, useState } from "react";
+import { doc, getDoc } from "firebase/firestore";
 
 interface SideNavProps {
 	isSidebarOpen: Boolean;
 }
 
-const SideNav = ({ isSidebarOpen}:SideNavProps) => {
+const SideNav = ({ isSidebarOpen }: SideNavProps) => {
+	const [user, setUser] = useState<any>();
+	const [profilePicture, setProfilePicture] = useState<string | null>(null);
+	useEffect(() => {
+		const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
+			if (auth.currentUser) {
+				const userDocRef = doc(db, "users", auth.currentUser.uid);
+				const userDocSnap = await getDoc(userDocRef);
+				console.log(userDocSnap);
+
+				if (userDocSnap.exists()) {
+					const userData = userDocSnap.data();
+					console.log(userData);
+					setProfilePicture(userData.profilePicture || null); // Use optional chaining
+					setUser(authUser); // Set user from auth state
+				}
+			} else {
+				setUser(null);
+				setProfilePicture(null);
+			}
+		});
+		return () => unsubscribe(); // Unsubscribe when component unmounts
+	}, []);
+
 	const handleSignOut = async () => {
 		await signOut(auth);
 	};
@@ -22,13 +45,23 @@ const SideNav = ({ isSidebarOpen}:SideNavProps) => {
 			}`}
 		>
 			<div className="p-6">
-				{/* User Profile/Avatar (Placeholder for now) */}
-				<div className="flex items-center mb-8">
-					<div className="w-12 h-12 bg-gray-300 rounded-full"></div>{" "}
-					{/* to Replace with actual avatar */}
+				<div className="flex-col justify-center items-center mb-8">
+					{profilePicture ? (
+						<div className="mb-2">
+							<img
+								src={profilePicture && `${profilePicture}?t=${Date.now()}`}
+								alt="Profile"
+							/>
+						</div>
+					) : (
+						<div className="h-20 w-20 rounded-full bg-gray-100 mb-2"></div>
+					)}
 					<div className="mr-4">
-						<h3 className="text-lg font-medium text-gray-900">اسم المستخدم</h3>{" "}
-						{/* to Replace with username */}
+						<h3 className="text-lg font-bold  text-gray-900">
+							{" "}
+							{/* user?.name ||  Use name from firestore if available, fallback to displayName from auth, then fallback to email  */}
+							{user?.name || user?.displayName || user?.email || "مستخدم"}{" "}
+						</h3>
 					</div>
 				</div>
 				<nav className="text-base text-gray-600">

@@ -36,6 +36,7 @@ export default function RegisterPage() {
 				{
 					email: user.email || "",
 					name: user.displayName || "اسم المستخدم", // Add other user data as needed
+					profilePicture: null,
 					timestamp: serverTimestamp(),
 				},
 				{ merge: true }

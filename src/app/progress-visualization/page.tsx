@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
 import { differenceInDays, format, subDays } from "date-fns";
 import { prayerNames, prayerNamesArabic } from "../lib/prayerConstants";
+import domtoimage from "dom-to-image";
 
 export default function ProgressVisualizationPage() {
 	const [completedPrayers, setCompletedPrayers] = useState<any>([]);
@@ -36,6 +37,46 @@ export default function ProgressVisualizationPage() {
 		});
 		return () => unsubscribe();
 	}, []);
+
+	const handleScreenshot = () => {
+		const element = document.querySelector("html");
+
+		if (!element) {
+			toast.error("فشل العثور على المحتوى المراد التقاطه.");
+			return;
+		}
+		const screenshotButton = document.getElementById("screenshotButton");
+		if (screenshotButton) screenshotButton.style.display = "none";
+
+		domtoimage
+			.toPng(element, {
+				style: {
+					// Display text correctly
+					direction: "rtl",
+					fontFamily: "Cairo, sans-serif",
+				},
+				bgcolor: "#fff",
+				quality: 1, // highest quality
+				width: document.body.scrollWidth, // Ensure full desktop view
+				height: document.body.scrollHeight, // Ensure full desktop view
+			})
+			.then((dataUrl: any) => {
+				const link = document.createElement("a");
+				link.href = dataUrl;
+				link.download =
+					format(new Date(), "dd-MM-yyyy") + "_Qadaa-Screenshoot.png";
+				link.click();
+				toast.success("تم التقاط لقطة الشاشة بنجاح!");
+			})
+			.catch((error: any) => {
+				console.error("فشل التقاط لقطة الشاشة:", error);
+				toast.error("فشل التقاط لقطة الشاشة.");
+			})
+			.finally(() => {
+				// Show the button again
+				if (screenshotButton) screenshotButton.style.display = "flex";
+			});
+	};
 
 	useEffect(() => {
 		const fetchCompletedPrayers = async (userId: string) => {
@@ -156,6 +197,15 @@ export default function ProgressVisualizationPage() {
 			<div className="container mx-auto px-4 py-8">
 				<h2 className="text-2xl font-bold mb-4 text-gray-900">عرض التقدم</h2>
 				{/* Screenshot Button */}
+				<button
+					className="hidden lg:flex py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600"
+					onClick={() => {
+						handleScreenshot();
+					}}
+					id="screenshotButton"
+				>
+					تحميل صورة للتقدم الحالي
+				</button>
 				<div className="my-4 text-center"></div>
 				{/* Filters for Start and End Dates  */}
 				<form
