@@ -1,158 +1,102 @@
 import Link from "next/link";
 import {
-  ClockIcon,
-  CheckCircleIcon,
-  DevicePhoneMobileIcon,
-  ChartBarIcon,
-  MegaphoneIcon,
-  UserGroupIcon,
-  VideoCameraIcon,
-  AcademicCapIcon,
+	CalendarIcon,
+	PencilIcon,
+	DevicePhoneMobileIcon,
+	ChartBarIcon,
+	MegaphoneIcon,
+	UserGroupIcon,
+	VideoCameraIcon,
 } from "@heroicons/react/24/outline";
 
 export default function LandingPage() {
-  return (
-    <div className="min-h-screen bg-white py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      <div className="relative max-w-7xl mx-auto">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl md:text-6xl lg:text-7xl">
-            <span className="block xl:inline my-4">أهلاً بك في </span>
-            <span className="block text-blue-600 xl:inline">
-              موقع قضاء
-            </span>
-          </h1>
-          <p className="mt-3 max-w-md mx-auto text-lg text-gray-500 sm:text-xl md:mt-5 md:max-w-3xl">
-            أقضى صلاتك بسهولة مع موقعنا المصمم خصيصا ليساعدك في ذلك.
-          </p>
-        </div>
+	return (
+		<div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
+			<div className="relative max-w-7xl mx-auto">
+				<div className="text-center">
+					<h1 className="text-5xl font-extrabold tracking-tight text-gray-900 sm:text-6xl md:text-7xl">
+						<span className="block mb-6">أهلاً بك في </span>
+						<span className="block text-blue-600">موقع قضاء</span>
+					</h1>
+					<p className="mt-6 max-w-3xl mx-auto text-lg text-gray-600 sm:text-xl">
+						أقضى صلاتك بسهولة مع موقعنا المصمم خصيصا ليساعدك في ذلك.
+					</p>
+					<div className="mt-6 flex justify-center space-x-4">
+						<Link
+							href="/register"
+							className="inline-flex ml-1 items-center justify-center px-8 py-3 text-base font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md shadow-lg"
+						>
+							سجل الآن
+						</Link>
+						<Link
+							href="/login"
+							className="inline-flex items-center justify-center px-8 py-3 text-base font-medium text-blue-600 bg-white hover:bg-gray-100 rounded-md shadow-lg border border-blue-600"
+						>
+							تسجيل الدخول
+						</Link>
+					</div>
+				</div>
 
-        <div className="mt-12 grid grid-cols-1 gap-y-12 sm:grid-cols-2 gap-x-6 lg:grid-cols-3 xl:gap-x-8">
-          <div className="border border-gray-200 rounded-lg shadow-sm divide-y divide-gray-200">
-            <div className="p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-md bg-blue-500 text-white">
-                  <ClockIcon className="h-6 w-6" aria-hidden="true" />
-                </div>
-                <h3 className="mr-4 text-lg leading-6 font-medium text-gray-900">
-                  تتبع دقيق
-                </h3>
-              </div>
-              <p className="mt-4 text-base text-gray-500">
-                سجّل جميع صلواتك الفائتة مع التاريخ ونوع الصلاة لكل منها.
-              </p>
-            </div>
-          </div>
-          <div className="border border-gray-200 rounded-lg shadow-sm divide-y divide-gray-200">
-            <div className="p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-md bg-blue-500 text-white">
-                  <CheckCircleIcon className="h-6 w-6" aria-hidden="true" />
-                </div>
-                <h3 className="mr-4 text-lg leading-6 font-medium text-gray-900">
-                  خطط فعّالة
-                </h3>
-              </div>
-              <p className="mt-4 text-base text-gray-500">
-                أنشئ خططًا مخصصة لقضاء الصلاة، وحدد أهدافًا يومية أو أسبوعية.
-              </p>
-            </div>
-          </div>
-          <div className="border border-gray-200 rounded-lg shadow-sm divide-y divide-gray-200">
-            <div className="p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-md bg-blue-500 text-white">
-                  <DevicePhoneMobileIcon
-                    className="h-6 w-6"
-                    aria-hidden="true"
-                  />
-                </div>
-                <h3 className="mr-4 text-lg leading-6 font-medium text-gray-900">
-                  اتاحة كبيرة
-                </h3>
-              </div>
-              <p className="mt-4 text-base text-gray-500">
-                ادخل إلى حسابك من أي جهاز، سواء كان حاسوبًا أو هاتفًا أو جهازًا
-                لوحيًا.
-              </p>
-            </div>
-          </div>
-          <div className="border border-gray-200 rounded-lg shadow-sm divide-y divide-gray-200">
-            <div className="p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-md bg-blue-500 text-white">
-                  <ChartBarIcon className="h-6 w-6" aria-hidden="true" />
-                </div>
-                <h3 className="mr-4 text-lg leading-6 font-medium text-gray-900">
-                  تصوّر تقدمك
-                </h3>
-              </div>
-              <p className="mt-4 text-base text-gray-500">
-                تابع تقدمك في قضاء الصلاة من خلال رسوم بيانية تفاعلية.
-              </p>
-            </div>
-          </div>
-          <div className="border border-gray-200 rounded-lg shadow-sm divide-y divide-gray-200">
-            <div className="p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-md bg-blue-500 text-white">
-                  <MegaphoneIcon className="h-6 w-6" aria-hidden="true" />
-                </div>
-                <h3 className="mr-4 text-lg leading-6 font-medium text-gray-900">
-                  حافظ على حماسك
-                </h3>
-              </div>
-              <p className="mt-4 text-base text-gray-500">
-                استقبل تذكيرات محفزة وتابع سلسلة تقدمك لتبقى متحمسًا.
-              </p>
-            </div>
-          </div>
-          <div className="border border-gray-200 rounded-lg shadow-sm divide-y divide-gray-200">
-            <div className="p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-md bg-blue-500 text-white">
-                  <UserGroupIcon className="h-6 w-6" aria-hidden="true" />
-                </div>
-                <h3 className="mr-4 text-lg leading-6 font-medium text-gray-900">
-                  شارك تقدمك
-                </h3>
-              </div>
-              <p className="mt-4 text-base text-gray-500">
-                شارك تقدمك مع أصدقائك وعائلتك للحصول على الدعم.
-              </p>
-            </div>
-          </div>
-          <div className="border border-gray-200 rounded-lg shadow-sm divide-y divide-gray-200">
-            <div className="p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-md bg-blue-500 text-white">
-                  <VideoCameraIcon className="h-6 w-6" aria-hidden="true" />
-                </div>
-                <h3 className="mr-4 text-lg leading-6 font-medium text-gray-900">
-                  مراجعة اداء الصلاة
-                </h3>
-              </div>
-              <p className="mt-4 text-base text-gray-500">
-                استخدم الذكاء الاصطناعي لتحليل وتقييم شكل صلاتك.
-              </p>
-            </div>
-          </div>{" "}
-        </div>
-
-        <div className="mt-10 flex justify-center">
-          <Link
-            href="/register"
-            className="mx-4 inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700"
-          >
-            سجل الآن
-          </Link>
-          <Link
-            href="/login"
-            className="mx-4 inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700"
-          >
-            تسجيل الدخول
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
+				<div className="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+					{[
+						{
+							icon: <CalendarIcon className="h-8 w-8" />,
+							title: "تتبع دقيق",
+							description:
+								" سجّل جميع صلواتك الفائتة مع التاريخ ونوع الصلاة لكل منها مع سهولة التعديل.",
+						},
+						{
+							icon: <PencilIcon className="h-8 w-8" />,
+							title: "خطط فعّالة",
+							description:
+								"أنشئ خططًا مخصصة لقضاء الصلاة، وحدد أهدافًا يومية أو أسبوعية.",
+						},
+						{
+							icon: <DevicePhoneMobileIcon className="h-8 w-8" />,
+							title: "اتاحة كبيرة",
+							description:
+								"ادخل إلى حسابك من أي جهاز، سواء كان حاسوبًا أو هاتفًا أو جهازًا لوحيًا.",
+						},
+						{
+							icon: <ChartBarIcon className="h-8 w-8" />,
+							title: "أعرض تقدمك",
+							description:
+								"تابع تقدمك في قضاء الصلاة من خلال رسوم بيانية تفاعلية.",
+						},
+						{
+							icon: <MegaphoneIcon className="h-8 w-8" />,
+							title: "حافظ على حماسك",
+							description:
+								"استقبل تذكيرات لأوقات قضاءك وتابع سلسلة تقدمك لتبقى متحمسًا.",
+						},
+						{
+							icon: <UserGroupIcon className="h-8 w-8" />,
+							title: "شارك تقدمك",
+							description: "شارك تقدمك مع أصدقائك وعائلتك للحصول على الدعم.",
+						},
+						{
+							icon: <VideoCameraIcon className="h-8 w-8" />,
+							title: "مراجعة أداء الصلاة",
+							description: "استخدم الذكاء الاصطناعي لتحليل وتقييم شكل صلاتك.",
+						},
+					].map((feature, index) => (
+						<div
+							key={index}
+							className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow"
+						>
+							<div className="flex items-center space-x-4">
+								<div className="p-4 ml-1 bg-blue-100 rounded-full text-blue-600">
+									{feature.icon}
+								</div>
+								<h3 className="text-lg font-semibold text-gray-900">
+									{feature.title}
+								</h3>
+							</div>
+							<p className="mt-4 text-gray-600">{feature.description}</p>
+						</div>
+					))}
+				</div>
+			</div>
+		</div>
+	);
 }

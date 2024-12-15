@@ -4,7 +4,7 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import webpush from "web-push";
 import cron from "node-cron";
-import { differenceInMinutes, addMinutes, subMinutes, addDays } from "date-fns";
+import {  addMinutes, subMinutes, addDays } from "date-fns";
 import dotenv from "dotenv";
 import serviceAccount from "./serviceAccountKey.json" with { type: "json" };
 
@@ -24,11 +24,9 @@ if (!admin.apps.length) {
 
 const db = admin.firestore(); // Firestore instance from Firebase Admin SDK
 
-console.log("vapid");
-console.log(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY);
 
 webpush.setVapidDetails(
-	"mailto:mt.alshahat@gmail.com",
+	process.env.NEXT_PUBLIC_VAPID_EMAIL,
 	process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
 	process.env.NEXT_PUBLIC_VAPID_PRIVATE_KEY
 );
@@ -112,9 +110,6 @@ cron.schedule("* * * * *", async () => {
 							body: `وقت قضاء الصلاة (${reminder.reminderTime}) للخطة (${planName})`,
 						},
 					};
-
-					console.log("fcmToken");
-					console.log(fcmToken);
 
 					const response = await admin.messaging().send(message); // Send push notification
 					console.log(`Successfully sent reminder for prayer: ${response}`);

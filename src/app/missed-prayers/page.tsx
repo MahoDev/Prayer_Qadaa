@@ -22,14 +22,8 @@ import {
 	PrayerType,
 } from "@/app/lib/prayerConstants";
 import Layout from "../components/Layout";
-import { ToastContainer, toast } from "react-toastify"; // For displaying toast messages
+import { toast } from "react-toastify"; // For displaying toast messages
 import "react-toastify/dist/ReactToastify.css"; // Import the CSS for react-toastify
-import { Metadata } from "next";
-
-const metadata: Metadata = {
-	title: "الصلوات الفائتة",
-	description: "صفحة لتسجيل الصلوات الفائتة وتعديلها أو حذفها",
-};
 
 export default function MissedPrayersPage() {
 	const [missedPrayers, setMissedPrayers] = useState<
@@ -57,7 +51,6 @@ export default function MissedPrayersPage() {
 				const missedPrayersRef = doc(db, "missedPrayers", user.uid);
 				const unsubscribeMissedPrayers = onSnapshot(missedPrayersRef, (doc) => {
 					if (doc.exists()) {
-						console.log("missed prayers doc exists");
 						setMissedPrayers(doc.data() as Record<PrayerType, number>);
 					} else {
 						createMissedPrayersDocument(user.uid);
@@ -94,7 +87,6 @@ export default function MissedPrayersPage() {
 			toast.error("حدث خطأ ما"); // Display error message to the user
 		}
 	};
-
 
 	const logPrayer = async (
 		prayerName: PrayerType,
@@ -274,274 +266,276 @@ export default function MissedPrayersPage() {
 	};
 
 	return (
-		<Layout>
-			<div className="container mx-auto px-4 py-8">
-				<h2 className="text-2xl font-bold mb-4 text-gray-900">
-					سجل الصلوات الفائتة
-				</h2>
+		<>
+			<Layout>
+				<div className="container mx-auto px-4 py-8">
+					<h2 className="text-2xl font-bold mb-4 text-gray-900">
+						سجل الصلوات الفائتة
+					</h2>
 
-				{/* Tab-like Navigation */}
-				<div className="flex border-b border-gray-200 mb-6">
-					{[1, 2, 3].map((methodNumber) => (
-						<button
-							key={methodNumber}
-							onClick={() => setActiveTab(methodNumber as 1 | 2 | 3)} // Type assertion
-							className={`py-2 px-4 text-gray-700 border-b-2 ${
-								activeTab === methodNumber
-									? "border-blue-500 text-blue-500 font-semibold"
-									: "border-transparent hover:text-gray-900"
-							}`}
-						>
-							{methodNumber === 1
-								? "إدخال يدوي"
-								: methodNumber === 2
-								? "حسب تاريخ البلوغ"
-								: "حسب تاريخ معين"}
-						</button>
-					))}
-				</div>
+					{/* Tab-like Navigation */}
+					<div className="flex border-b border-gray-200 mb-6">
+						{[1, 2, 3].map((methodNumber) => (
+							<button
+								key={methodNumber}
+								onClick={() => setActiveTab(methodNumber as 1 | 2 | 3)} // Type assertion
+								className={`py-2 px-4 text-gray-700 border-b-2 ${
+									activeTab === methodNumber
+										? "border-blue-500 text-blue-500 font-semibold"
+										: "border-transparent hover:text-gray-900"
+								}`}
+							>
+								{methodNumber === 1
+									? "إدخال يدوي"
+									: methodNumber === 2
+									? "حسب تاريخ البلوغ"
+									: "حسب تاريخ معين"}
+							</button>
+						))}
+					</div>
 
-				{/* Method 1: Manual Input */}
-				{activeTab === 1 && (
-					<form onSubmit={handleMethod1}>
-						<div className="grid grid-cols-2 gap-4 mb-4">
-							{prayerNames.map((prayerName) => (
-								<div key={prayerName}>
+					{/* Method 1: Manual Input */}
+					{activeTab === 1 && (
+						<form onSubmit={handleMethod1}>
+							<div className="grid grid-cols-2 gap-4 mb-4">
+								{prayerNames.map((prayerName) => (
+									<div key={prayerName}>
+										<label
+											htmlFor={prayerName}
+											className="block text-sm font-medium text-gray-700"
+										>
+											{prayerNamesArabic[prayerName]}
+										</label>
+										<input
+											type="number"
+											id={prayerName}
+											name={prayerName}
+											className="mt-1 p-2 block w-full text-gray-500  rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm mr-1"
+											min="0"
+										/>
+									</div>
+								))}
+							</div>
+							<button
+								type="submit"
+								className="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-700"
+							>
+								تسجيل
+							</button>
+						</form>
+					)}
+
+					{/* Method 2: by Taklif/puberty Date */}
+					{activeTab === 2 && (
+						<form onSubmit={handleMethod2} className="mb-4">
+							<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+								<div>
 									<label
-										htmlFor={prayerName}
-										className="block text-sm font-medium text-gray-700"
+										htmlFor="birthDate"
+										className="block text-sm font-medium text-gray-700 mb-1"
 									>
-										{prayerNamesArabic[prayerName]}
+										تاريخ الميلاد
+									</label>
+									<input
+										type="date"
+										id="birthDate"
+										name="birthDate"
+										value={birthDate}
+										onChange={(e) => setBirthDate(e.target.value)}
+										className="block p-2 w-full text-gray-500 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+									/>
+								</div>
+								<div>
+									<label
+										htmlFor="pubertyAge"
+										className="block text-sm font-medium text-gray-700 mb-1"
+									>
+										سن البلوغ
 									</label>
 									<input
 										type="number"
-										id={prayerName}
-										name={prayerName}
-										className="mt-1 p-2 block w-full text-gray-500  rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm mr-1"
+										id="pubertyAge"
+										name="pubertyAge"
+										value={pubertyAge}
+										onChange={(e) => setPubertyAge(e.target.value)}
+										className="block p-2 w-full text-gray-500 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
 										min="0"
 									/>
 								</div>
-							))}
-						</div>
-						<button
-							type="submit"
-							className="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-700"
-						>
-							تسجيل
-						</button>
-					</form>
-				)}
-
-				{/* Method 2: by Taklif/puberty Date */}
-				{activeTab === 2 && (
-					<form onSubmit={handleMethod2} className="mb-4">
-						<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-							<div>
-								<label
-									htmlFor="birthDate"
-									className="block text-sm font-medium text-gray-700 mb-1"
-								>
-									تاريخ الميلاد
-								</label>
-								<input
-									type="date"
-									id="birthDate"
-									name="birthDate"
-									value={birthDate}
-									onChange={(e) => setBirthDate(e.target.value)}
-									className="block p-2 w-full text-gray-500 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-								/>
-							</div>
-							<div>
-								<label
-									htmlFor="pubertyAge"
-									className="block text-sm font-medium text-gray-700 mb-1"
-								>
-									سن البلوغ
-								</label>
-								<input
-									type="number"
-									id="pubertyAge"
-									name="pubertyAge"
-									value={pubertyAge}
-									onChange={(e) => setPubertyAge(e.target.value)}
-									className="block p-2 w-full text-gray-500 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-									min="0"
-								/>
-							</div>
-							<div>
-								<label
-									htmlFor="prayerStartAge"
-									className="block text-sm font-medium text-gray-700 mb-1"
-								>
-									سن بدء الصلاة
-								</label>
-								<input
-									type="number"
-									id="prayerStartAge"
-									name="prayerStartAge"
-									value={prayerStartAge}
-									onChange={(e) => setPrayerStartAge(e.target.value)}
-									className="block p-2 w-full text-gray-500 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-									min="0"
-								/>
-							</div>
-						</div>
-						<button
-							type="submit"
-							className="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-700 mt-4"
-						>
-							حساب
-						</button>
-					</form>
-				)}
-
-				{/* Method 3: Date Range */}
-				{activeTab === 3 && (
-					<form onSubmit={handleMethod3}>
-						<div className="grid grid-cols-2 gap-4 mb-4">
-							<div>
-								<label
-									htmlFor="startDate"
-									className="block text-sm font-medium text-gray-700 mb-1"
-								>
-									تاريخ البداية
-								</label>
-								<input
-									type="date"
-									id="startDate"
-									name="startDate"
-									value={startDate}
-									onChange={(e) => setStartDate(e.target.value)}
-									className="block p-2 w-full text-gray-500 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-								/>
-							</div>
-							<div>
-								<label
-									htmlFor="endDate"
-									className="block text-sm font-medium text-gray-700 mb-1"
-								>
-									تاريخ النهاية
-								</label>
-								<input
-									type="date"
-									id="endDate"
-									name="endDate"
-									value={endDate}
-									onChange={(e) => setEndDate(e.target.value)}
-									className="block p-2 w-full text-gray-500 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-								/>
-							</div>
-						</div>
-
-						<button
-							type="submit"
-							className="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-700"
-						>
-							حساب
-						</button>
-					</form>
-				)}
-
-				{/* Reset Confirmation Overlay */}
-				{showResetConfirmation && (
-					<div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-						<div className="bg-white p-6 rounded shadow-md">
-							<p className="text-gray-700 mb-4">
-								هل أنت متأكد أنك تريد إعادة تعيين كل الصلوات الفائتة؟
-							</p>
-							<div className="flex justify-end">
-								<button
-									onClick={() => setShowResetConfirmation(false)}
-									className="mr-2 py-2 px-4 rounded border text-white border-gray-300 bg-red-500 hover:bg-red-600"
-								>
-									إلغاء
-								</button>
-								<button
-									onClick={handleResetConfirm}
-									className="py-2 px-4 bg-green-500 text-white rounded hover:bg-green-600"
-								>
-									تأكيد
-								</button>
-							</div>
-						</div>
-					</div>
-				)}
-				{/* Display Missed Prayers */}
-
-				<div className="mt-8">
-					<h3 className="text-lg font-medium text-gray-900 mb-2">
-						الصلوات الفائتة
-					</h3>
-					<ul className="border border-gray-200 rounded-md divide-y divide-gray-200">
-						{prayerNames.map((prayerName) => (
-							<li
-								key={prayerName}
-								className="pl-3 pr-4 py-3 flex items-center justify-between text-sm"
-							>
-								<div className="w-0 flex-1 flex items-center">
-									<span className="ml-2 flex-1 w-0 truncate text-gray-900">
-										{prayerNamesArabic[prayerName]}
-									</span>
-								</div>
-								<div className="ml-4 flex-shrink-0 relative">
-									{editingPrayer === prayerName ? ( // Conditional rendering for edit input
-										<div>
-											<input
-												type="number"
-												value={editValue}
-												onChange={(e) => {
-													if (!isNaN(parseInt(e.target.value)))
-														// type checking and restriction to numbers only
-														setEditValue(parseInt(e.target.value));
-												}}
-												className="w-20 border border-gray-300 rounded px-2"
-											/>
-											<button
-												onClick={() =>
-													handleEditSave(prayerName as PrayerType, editValue)
-												}
-												className="ml-2 px-2 py-1 bg-green-500 text-white rounded"
-											>
-												حفظ
-											</button>
-										</div>
-									) : (
-										<span className="font-medium text-gray-900">
-											{missedPrayers[prayerName as PrayerType] || 0}
-										</span>
-									)}
-
-									<button
-										onClick={() => {
-											if (editingPrayer !== prayerName) {
-												handleEditClick(
-													prayerName,
-													missedPrayers[prayerName] || 0
-												);
-											} else {
-												setEditingPrayer(null);
-												setEditValue(0);
-											}
-										}}
-										className={`ml-2 text-blue-500 hover:underline ${
-											editingPrayer === prayerName ? "text-red-500" : ""
-										}`}
+								<div>
+									<label
+										htmlFor="prayerStartAge"
+										className="block text-sm font-medium text-gray-700 mb-1"
 									>
-										{editingPrayer === prayerName ? "إلغاء" : "تعديل"}{" "}
+										سن بدء الصلاة
+									</label>
+									<input
+										type="number"
+										id="prayerStartAge"
+										name="prayerStartAge"
+										value={prayerStartAge}
+										onChange={(e) => setPrayerStartAge(e.target.value)}
+										className="block p-2 w-full text-gray-500 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+										min="0"
+									/>
+								</div>
+							</div>
+							<button
+								type="submit"
+								className="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-700 mt-4"
+							>
+								حساب
+							</button>
+						</form>
+					)}
+
+					{/* Method 3: Date Range */}
+					{activeTab === 3 && (
+						<form onSubmit={handleMethod3}>
+							<div className="grid grid-cols-2 gap-4 mb-4">
+								<div>
+									<label
+										htmlFor="startDate"
+										className="block text-sm font-medium text-gray-700 mb-1"
+									>
+										تاريخ البداية
+									</label>
+									<input
+										type="date"
+										id="startDate"
+										name="startDate"
+										value={startDate}
+										onChange={(e) => setStartDate(e.target.value)}
+										className="block p-2 w-full text-gray-500 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+									/>
+								</div>
+								<div>
+									<label
+										htmlFor="endDate"
+										className="block text-sm font-medium text-gray-700 mb-1"
+									>
+										تاريخ النهاية
+									</label>
+									<input
+										type="date"
+										id="endDate"
+										name="endDate"
+										value={endDate}
+										onChange={(e) => setEndDate(e.target.value)}
+										className="block p-2 w-full text-gray-500 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+									/>
+								</div>
+							</div>
+
+							<button
+								type="submit"
+								className="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-700"
+							>
+								حساب
+							</button>
+						</form>
+					)}
+
+					{/* Reset Confirmation Overlay */}
+					{showResetConfirmation && (
+						<div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+							<div className="bg-white p-6 rounded shadow-md">
+								<p className="text-gray-700 mb-4">
+									هل أنت متأكد أنك تريد إعادة تعيين كل الصلوات الفائتة؟
+								</p>
+								<div className="flex justify-end">
+									<button
+										onClick={() => setShowResetConfirmation(false)}
+										className="mr-2 py-2 px-4 rounded border text-white border-gray-300 bg-red-500 hover:bg-red-600"
+									>
+										إلغاء
+									</button>
+									<button
+										onClick={handleResetConfirm}
+										className="py-2 px-4 bg-green-500 text-white rounded hover:bg-green-600"
+									>
+										تأكيد
 									</button>
 								</div>
-							</li>
-						))}
-					</ul>
-					<button
-						onClick={() => setShowResetConfirmation(true)}
-						className="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-					>
-						إعادة تعيين الكل
-					</button>
+							</div>
+						</div>
+					)}
+					{/* Display Missed Prayers */}
+
+					<div className="mt-8">
+						<h3 className="text-lg font-medium text-gray-900 mb-2">
+							الصلوات الفائتة
+						</h3>
+						<ul className="border border-gray-200 rounded-md divide-y divide-gray-200">
+							{prayerNames.map((prayerName) => (
+								<li
+									key={prayerName}
+									className="pl-3 pr-4 py-3 flex items-center justify-between text-sm"
+								>
+									<div className="w-0 flex-1 flex items-center">
+										<span className="ml-2 flex-1 w-0 truncate text-gray-900">
+											{prayerNamesArabic[prayerName]}
+										</span>
+									</div>
+									<div className="ml-4 flex-shrink-0 relative">
+										{editingPrayer === prayerName ? ( // Conditional rendering for edit input
+											<div>
+												<input
+													type="number"
+													value={editValue}
+													onChange={(e) => {
+														if (!isNaN(parseInt(e.target.value)))
+															// type checking and restriction to numbers only
+															setEditValue(parseInt(e.target.value));
+													}}
+													className="w-20 border border-gray-300 rounded px-2"
+												/>
+												<button
+													onClick={() =>
+														handleEditSave(prayerName as PrayerType, editValue)
+													}
+													className="ml-2 px-2 py-1 bg-green-500 text-white rounded"
+												>
+													حفظ
+												</button>
+											</div>
+										) : (
+											<span className="font-medium text-gray-900">
+												{missedPrayers[prayerName as PrayerType] || 0}
+											</span>
+										)}
+
+										<button
+											onClick={() => {
+												if (editingPrayer !== prayerName) {
+													handleEditClick(
+														prayerName,
+														missedPrayers[prayerName] || 0
+													);
+												} else {
+													setEditingPrayer(null);
+													setEditValue(0);
+												}
+											}}
+											className={`ml-2 text-blue-500 hover:underline ${
+												editingPrayer === prayerName ? "text-red-500" : ""
+											}`}
+										>
+											{editingPrayer === prayerName ? "إلغاء" : "تعديل"}{" "}
+										</button>
+									</div>
+								</li>
+							))}
+						</ul>
+						<button
+							onClick={() => setShowResetConfirmation(true)}
+							className="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+						>
+							إعادة تعيين الكل
+						</button>
+					</div>
 				</div>
-			</div>
-		</Layout>
+			</Layout>
+		</>
 	);
 }

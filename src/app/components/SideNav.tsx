@@ -18,11 +18,8 @@ const SideNav = ({ isSidebarOpen }: SideNavProps) => {
 			if (auth.currentUser) {
 				const userDocRef = doc(db, "users", auth.currentUser.uid);
 				const userDocSnap = await getDoc(userDocRef);
-				console.log(userDocSnap);
-
 				if (userDocSnap.exists()) {
 					const userData = userDocSnap.data();
-					console.log(userData);
 					setProfilePicture(userData.profilePicture || null); // Use optional chaining
 					setUser(authUser); // Set user from auth state
 				}
@@ -46,11 +43,12 @@ const SideNav = ({ isSidebarOpen }: SideNavProps) => {
 		>
 			<div className="p-6">
 				<div className="flex-col justify-center items-center mb-8">
-					{profilePicture ? (
+					{user?.profilePicture || profilePicture ? (
 						<div className="mb-2">
 							<img
-								src={profilePicture && `${profilePicture}?t=${Date.now()}`}
-								alt="Profile"
+								className="w-20 h-20 rounded-full"
+								src={user?.profilePicture || profilePicture}
+								alt="Profile pic"
 							/>
 						</div>
 					) : (

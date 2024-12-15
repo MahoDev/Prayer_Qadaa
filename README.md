@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+## How to setup and start the project locally
+First, ensure you have node and python installed.
 
-First, run the development server:
+**For the Next.js project:**
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Install npm dependencies:
 ```
+npm install 
+```
+
+1- Go to Firebase console, create a new project and add a web app.
+
+2- Copy the config values and paste them next to the appropriate environemnt variable in the .env file.
+
+3- In firebase console, Go to project settings => Cloud Messaging => Generate key pair.
+Copy the private and public keys and place them in appropriate places in .env file.
+ 
+4- Go to project settings => Service accounts => generate new private key and store the downloaded file as "serviceAccountKey.json" in root of the project.
+
+5- Enable authentication, and allow Google and Email/password providers.
+
+6- Enable firestore, and create the collections:
+* users
+* missedPrayer
+* qadaaPlans
+* scheduledReminders
+* completedPrayers
+
+5- Run the server hosting the cronjob for the Qadaa Plans reminders:
+```
+node server.js
+```
+
+6- Run the server for the UI:
+```
+npm run dev
+```
+
+The site should be working now for the most part.
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**For the Python backend**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1- Open "model_api" directory in code editor.
 
-## Learn More
+2- Create a virtual environemnt:
+```
+pip install virtualenv
+python -m venv randomName
+source env/bin/activate
+```
 
-To learn more about Next.js, take a look at the following resources:
+3- Install all the dependencies:
+```
+pip install -r requirements.txt
+```
+4- Run server
+```
+python app.py
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Credits:
+Favicon from flaticon.com

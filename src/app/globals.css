@@ -3,14 +3,14 @@
 @tailwind utilities;
 
 @font-face {
-	font-family: "Cairo"; /* Or your chosen Arabic font */
-	src: url("/fonts/Cairo-Regular.ttf") format("truetype"); /* Adjust path and format if necessary */
+	font-family: "Cairo"; 
+	src: url("/fonts/Cairo-Regular.ttf") format("truetype");
 	font-weight: 400; /* Regular weight */
 }
 
 @font-face {
 	font-family: "Cairo";
-	src: url("/fonts/Cairo-Bold.ttf") format("truetype"); /* Add other weights as needed */
+	src: url("/fonts/Cairo-Bold.ttf") format("truetype"); 
 	font-weight: 700; /* Bold weight */
 }
 

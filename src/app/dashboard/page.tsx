@@ -1,14 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-	Root as DialogRoot,
-	Content as DialogContent,
-	DialogTrigger,
-	DialogClose,
-	DialogTitle,
-	DialogDescription,
-} from "@radix-ui/react-dialog";
 import * as ToolTip from "@radix-ui/react-tooltip";
 import {
 	Chart as ChartJS,
@@ -18,32 +10,26 @@ import {
 	Title,
 	Tooltip,
 	Legend,
-	ChartOptions,
-	ScriptableContext,
+
 } from "chart.js";
-import { Bar } from "react-chartjs-2";
 import Link from "next/link";
 import {
 	addDays,
 	differenceInDays,
 	format,
 	isSameDay,
-	startOfYear,
+	
 	subDays,
 } from "date-fns";
-import { RiFireFill } from "@remixicon/react";
-import { signOut, onAuthStateChanged } from "firebase/auth";
+import {  onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/app/lib/firebase";
 import { useRouter } from "next/navigation";
 import {
 	collection,
-	addDoc,
 	getDocs,
 	serverTimestamp,
 	query,
 	where,
-	orderBy,
-	updateDoc,
 	increment,
 	onSnapshot,
 	doc,
@@ -65,10 +51,6 @@ import { Metadata } from "next";
 import { toast } from "react-toastify";
 import PrayerChart from "../components/PrayerChart";
 
-const metadata: Metadata = {
-	title: "الرئيسية",
-	description: "الصفحة الرئيسية حيث يمكن رؤية وتسجيل التقدم في القضاء",
-};
 
 // Register Chart.js components
 ChartJS.register(

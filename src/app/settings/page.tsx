@@ -13,7 +13,6 @@ import {
 	where,
 	getDocs,
 	writeBatch,
-	setDoc,
 } from "firebase/firestore";
 import {
 	deleteUser,
@@ -397,14 +396,14 @@ export default function SettingsPage() {
 							</h3>
 							<div className="mb-4">
 								<label
-									htmlFor="currentPassword"
+									htmlFor="currPassword"
 									className="block text-sm font-medium text-gray-700"
 								>
 									كلمة المرور الحالية
 								</label>
 								<input
 									type="password"
-									id="currentPassword"
+									id="currPassword"
 									value={currentPassword}
 									onChange={(e) => setCurrentPassword(e.target.value)}
 									className="border border-gray-300 rounded-md px-3 py-2 w-full sm:w-auto focus:outline-none focus:ring-blue-500 focus:border-blue-500"
@@ -477,8 +476,6 @@ export default function SettingsPage() {
 						</div>
 					</div>
 				)}
-
-				{/* Notification Preferences and other settings can be added here */}
 
 				{/* Delete Account Button */}
 				{user && (

@@ -24,7 +24,6 @@ async function requestAndStoreToken(userId) {
 						{ fcmToken: token, timestamp: serverTimestamp() },
 						{ merge: true }
 					);
-					console.log("Token stored in Firestore");
 				}
 			} catch (error) {
 				console.error("Error storing token in Firestore:", error);
@@ -57,7 +56,7 @@ export default function NotificationHandler() {
 			navigator.serviceWorker
 				.register("/firebase-messaging-sw.js")
 				.then((registration) => {
-					console.log("Service worker registered:", registration);
+					console.log("Service worker registered:");
 				})
 				.catch((error) => {
 					console.error("Service worker registration failed:", error);

@@ -2,16 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Layout from "../components/Layout";
-import {
-	addDays,
-	differenceInDays,
-	format,
-	startOfWeek,
-	subDays,
-	addWeeks,
-	isSameDay,
-	differenceInCalendarWeeks,
-} from "date-fns";
+import { addDays, differenceInDays, format } from "date-fns";
 import {
 	prayerNames,
 	prayerNamesArabic,
@@ -25,22 +16,13 @@ import {
 	where,
 	doc,
 	getDoc,
-	setDoc,
-	serverTimestamp,
 	updateDoc,
 	deleteDoc,
-	onSnapshot,
 	Timestamp,
 	writeBatch,
 } from "firebase/firestore";
 import { db, auth } from "../lib/firebase";
-import * as Select from "@radix-ui/react-select";
-import {
-	CheckIcon,
-	ChevronDownIcon,
-	Pencil1Icon,
-	TrashIcon,
-} from "@radix-ui/react-icons";
+import { CheckIcon, Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
 import { toast } from "react-toastify";
 
 import { useRouter, useSearchParams } from "next/navigation";
@@ -835,7 +817,6 @@ export default function QadaaPlanPage() {
 						)}
 					</div>
 				)}
-				{/* ... other elements (Visualization, Streak Display, etc.)  */}
 			</div>
 		</Layout>
 	);

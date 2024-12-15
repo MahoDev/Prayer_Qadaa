@@ -1,67 +1,56 @@
 "use client";
-
 import { useState } from "react";
 import Link from "next/link";
 import {
-  signInWithEmailAndPassword,
-  GoogleAuthProvider,
-  signInWithRedirect,
-  getRedirectResult,
-  signInWithPopup,
+	signInWithEmailAndPassword,
+	GoogleAuthProvider,
+	signInWithPopup,
 } from "firebase/auth";
 import { auth } from "@/app/lib/firebase";
 import { useRouter } from "next/navigation";
-import { Metadata } from "next";
-import { RiGoogleFill, RiGoogleLine } from "@remixicon/react";
-
-const metadata: Metadata = {
-	title: "تسجيل الدخول",
-	description: "صفحة تسجيل الدخول",
-};
-
+import { RiGoogleFill } from "@remixicon/react";
 
 export default function LoginPage() {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+	const router = useRouter();
+	const [email, setEmail] = useState("");
+	const [password, setPassword] = useState("");
+	const [error, setError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError("");
+	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		setError("");
 
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      router.push("/dashboard"); 
-      // router.push("/");
-    } catch (error: any) {
-      if (error.message.includes("auth/user-not-found"))
-        setError("المستخدم غير موجود");
-      else if (error.message.includes("auth/wrong-password"))
-        setError("كلمة المرور غير صحيحة");
-      else setError("حدث خطأ ما");
-      console.error("Login Error:", error);
-    }
-  };
+		try {
+			await signInWithEmailAndPassword(auth, email, password);
+			router.push("/dashboard");
+			// router.push("/");
+		} catch (error: any) {
+			if (error.message.includes("auth/user-not-found"))
+				setError("المستخدم غير موجود");
+			else if (error.message.includes("auth/wrong-password"))
+				setError("كلمة المرور غير صحيحة");
+			else setError("حدث خطأ ما");
+			console.error("Login Error:", error);
+		}
+	};
 
-  const handleGoogleSignIn = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-      // Check for redirect result (if user is returning from Google)
-      const result = await signInWithPopup(auth, provider);
-      if (result) {
-        // User successfully signed in.  You can get user details from `result.user`.
-        router.push("/dashboard");
-        return;
-      }
-      //await signInWithRedirect(auth, provider);
-    } catch (err) {
-      console.error("Error signing in with Google:", err);
-      setError("حدث خطأ أثناء تسجيل الدخول باستخدام جوجل.");
-    }
-  };
+	const handleGoogleSignIn = async () => {
+		const provider = new GoogleAuthProvider();
+		try {
+			// Check for redirect result (if user is returning from Google)
+			const result = await signInWithPopup(auth, provider);
+			if (result) {
+				// User successfully signed in.  You can get user details from `result.user`.
+				router.push("/dashboard");
+				return;
+			}
+		} catch (err) {
+			console.error("Error signing in with Google:", err);
+			setError("حدث خطأ أثناء تسجيل الدخول باستخدام جوجل.");
+		}
+	};
 
-  return (
+	return (
 		<div className="min-h-screen bg-white flex flex-col justify-center py-12 sm:px-6 lg:px-8">
 			<div className="sm:mx-auto sm:w-full sm:max-w-md">
 				<h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">

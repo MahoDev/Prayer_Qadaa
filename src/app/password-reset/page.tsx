@@ -3,12 +3,7 @@ import { useState } from "react";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "@/app/lib/firebase";
 import { useRouter } from "next/navigation";
-import { Metadata } from "next";
 
- const metadata: Metadata = {
-	title: "إستعادة كلمة المرور",
-	description: "صفحة إستعادة كلمة المرور المنسية",
-};
 
 export default function PasswordResetPage() {
 	const router = useRouter();
