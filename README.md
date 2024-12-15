@@ -27,12 +27,12 @@ Copy the private and public keys and place them in appropriate places in .env fi
 * scheduledReminders
 * completedPrayers
 
-5- Run the server hosting the cronjob for the Qadaa Plans reminders:
+7- Run the server hosting the cronjob for the Qadaa Plans reminders:
 ```
 node server.js
 ```
 
-6- Run the server for the UI:
+8- Run the server for the UI:
 ```
 npm run dev
 ```
